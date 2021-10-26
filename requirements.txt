@@ -1,0 +1,4 @@
+requests~=2.25.1
+prettytable~=2.1.0
+psutil
+git+https://github.com/Rapptz/discord.py
