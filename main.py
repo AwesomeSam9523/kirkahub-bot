@@ -10,13 +10,13 @@ saycmd = {}
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 bot.remove_command("help")
 
-@bot.check
-async def onlystaff(ctx:Context):
+def onlystaff(ctx:Context):
     if ctx.guild.get_role(868890524843638804) not in ctx.author.roles:
         return False
     return True
 
 @bot.event
+@commands.check(onlystaff)
 async def on_member_join(member:discord.Member):
     count = member.guild.member_count
     if str(count)[:-1] == "1":
@@ -47,6 +47,7 @@ async def on_member_remove(member:discord.Member):
     await bot.get_channel(868890526433280027).send(embed=embed)
 
 @bot.command()
+@commands.check(onlystaff)
 async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
     url = ""
     if isinstance(emoji, discord.Emoji):
@@ -74,6 +75,7 @@ async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
         await ctx.send(f"An error occured: {e}")
 
 @bot.command()
+@commands.check(onlystaff)
 async def say(ctx, *, sentence):
     chl = sentence.split(" ")[0]
     chlmodified = False
@@ -96,8 +98,28 @@ async def say(ctx, *, sentence):
     except:
         ctx.reply("An error occured. Make sure I have sufficient permission in the channel to talk")
 
+@bot.command()
+async def bgtos(ctx):
+    tos = """
+[1] Background must not be messy. That includes having too many random objects and stuff going on in the background
+[2] The background must not make the stats difficult to read in any way
+[3] The background must not fake any stat, such as verification mark, etc
+[4] The background must not be pure white, pure black, completely transparent, or a close variant
+[5] There must be a visible border and outlines around the background.
+[6] There must be no or very little text in the background, use background text option instead
+[7] Background must not be flashing, or hypnotic/epileptic.
+[8] The background is recommended to be cozy/patterns
+[9] A proper color scheme must be used. Extra bright colors are also not recommended
+[10] The background must not contain any copyright/NSFW content.
+    """
+    embed = discord.Embed(description=f"```css\n{tos}```", color=15424347)
+    embed.set_footer(text="Thanks to BlackThunder#4007 for these rules.")
+    await ctx.send(embed=embed)
+
 @bot.event
 async def on_ready():
     print("Ready!")
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Kirka Hub"),
+                              status=discord.Status.dnd)
 
 bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.n_2ihr6mfQI38s_dvpww265yL80")
