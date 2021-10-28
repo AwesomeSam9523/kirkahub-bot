@@ -119,7 +119,7 @@ async def bgtos(ctx):
 @bot.event
 async def on_ready():
     print("Ready!")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Kirka Hub"),
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Kirka Hub | k.invite"),
                               status=discord.Status.dnd)
 
 bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.n_2ihr6mfQI38s_dvpww265yL80")
