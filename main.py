@@ -1,8 +1,8 @@
 import datetime
 from discord.ext.commands import Context
 import discord
-from discord.ext import commands
-import asyncio
+from discord.ext import commands, tasks
+import asyncio, aiohttp
 import requests
 from typing import Union
 saycmd = {}
@@ -100,26 +100,21 @@ async def say(ctx, *, sentence):
 
 @bot.command()
 async def bgtos(ctx):
-    tos = """
-[1] Background must not be messy. That includes having too many random objects and stuff going on in the background
-[2] The background must not make the stats difficult to read in any way
-[3] The background must not fake any stat, such as verification mark, etc
-[4] The background must not be pure white, pure black, completely transparent, or a close variant
-[5] There must be a visible border and outlines around the background.
-[6] There must be no or very little text in the background, use background text option instead
-[7] Background must not be flashing, or hypnotic/epileptic.
-[8] The background is recommended to be cozy/patterns
-[9] A proper color scheme must be used. Extra bright colors are also not recommended
-[10] The background must not contain any copyright/NSFW content.
-    """
-    embed = discord.Embed(description=f"```css\n{tos}```", color=15424347)
-    embed.set_footer(text="Thanks to BlackThunder#4007 for these rules.")
-    await ctx.send(embed=embed)
+    await ctx.reply("Use `;bgtos` instead.")
 
+@tasks.loop(seconds=30)
+async def botStatus():
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://kirkaclient.herokuapp.com/api/users") as a:
+            a = await a.json()
+            count = a["count"]
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f"KirkaClient {f'with {count} users' if count else ''}"),
+                                      status=discord.Status.dnd)
+    
+    
 @bot.event
 async def on_ready():
     print("Ready!")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Kirka Hub | k.invite"),
-                              status=discord.Status.dnd)
+    botStatus.start()
 
 bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.n_2ihr6mfQI38s_dvpww265yL80")
