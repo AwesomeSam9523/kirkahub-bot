@@ -102,6 +102,24 @@ async def say(ctx, *, sentence):
 async def bgtos(ctx):
     await ctx.reply("Use `;bgtos` instead.")
 
+tidesc = """**How to setup KirkaClient Twitch Integration:**\n
+1. Make a new Twitch Account
+2. Name it whatever you wish (it will be bot's name)
+3. Go to https://twitchapps.com/tmi/ and authorize with new account
+4. Copy the token to clipboard
+5. Open KirkaClient
+6. Enter Username as your bot's name
+7. Enter OAuth token as token you copied
+8. Enter Channel as your main twitch channel
+9. Restart client
+"""
+    
+@bot.command()
+async def ti(ctx):
+    embed = discord.Embed(title="Twitch Integration",
+                         description=tidesc)
+    await ctx.send(embed=embed)
+
 @tasks.loop(seconds=30)
 async def botStatus():
     async with aiohttp.ClientSession() as session:
