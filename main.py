@@ -118,6 +118,7 @@ tidesc = """**How to setup KirkaClient Twitch Integration:**\n
 async def ti(ctx):
     embed = discord.Embed(title="Twitch Integration",
                          description=tidesc)
+    embed.set_image(url="https://media.discordapp.net/attachments/868890525871247451/913617441106571304/unknown.png")
     await ctx.send(embed=embed)
 
 @tasks.loop(seconds=30)
