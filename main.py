@@ -127,7 +127,11 @@ async def botStatus():
         async with session.get("https://kirkaclient.herokuapp.com/api/users") as a:
             a = await a.json()
             count = a["count"]
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f"KirkaClient {f'with {count} users' if count else ''}"),
+            if count == 1:
+                sense = 'user'
+            else:
+                sense = 'users'
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f"KirkaClient {f'with {count} {sense}' if count else ''}"),
                                       status=discord.Status.dnd)
     
     
