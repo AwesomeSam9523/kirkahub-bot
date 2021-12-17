@@ -114,7 +114,7 @@ tidesc = """**How to setup KirkaClient Twitch Integration:**\n
 9. Restart client
 """
     
-@bot.command()
+@bot.command(aliases=['twitch'])
 async def ti(ctx):
     embed = discord.Embed(title="Twitch Integration",
                          description=tidesc)
