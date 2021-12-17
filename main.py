@@ -16,7 +16,6 @@ def onlystaff(ctx:Context):
     return True
 
 @bot.event
-@commands.check(onlystaff)
 async def on_member_join(member:discord.Member):
     count = member.guild.member_count
     if str(count)[:-1] == "1":
@@ -47,7 +46,7 @@ async def on_member_remove(member:discord.Member):
     await bot.get_channel(868890526433280027).send(embed=embed)
 
 @bot.command()
-@commands.check(onlystaff)
+@commands.check_any(onlystaff, is_owner)
 async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
     url = ""
     if isinstance(emoji, discord.Emoji):
@@ -75,7 +74,7 @@ async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
         await ctx.send(f"An error occured: {e}")
 
 @bot.command()
-@commands.check(onlystaff)
+@commands.check_any(onlystaff, is_owner)
 async def say(ctx, *, sentence):
     chl = sentence.split(" ")[0]
     chlmodified = False
