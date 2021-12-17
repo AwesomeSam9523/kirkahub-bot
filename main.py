@@ -123,6 +123,15 @@ async def ti(ctx):
 
 @tasks.loop(seconds=30)
 async def botStatus():
+    kh = bot.get_guild(868890520468983819)
+    booster = await kh.fetch_role(868890520527732799)
+    staff = await kh.fetch_role(868890524843638804)
+    for i in kh.members:
+        if i in kh.premium_subscribers and booster not in i.roles:
+            await i.add_role(booster)
+        if i not in kh.premium_subscribers and booster in i.roles and staff not in i.roles:
+            await i.remove_role(booster)
+    
     async with aiohttp.ClientSession() as session:
         async with session.get("https://kirkaclient.herokuapp.com/api/users") as a:
             a = await a.json()
