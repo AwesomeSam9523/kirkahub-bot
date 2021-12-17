@@ -129,10 +129,10 @@ async def botStatus():
     for i in kh.members:
         if i in kh.premium_subscribers and booster not in i.roles:
             await i.add_roles(booster)
-            print(f'Added booster role to {i}'))
+            print(f'Added booster role to {i}')
         if i not in kh.premium_subscribers and booster in i.roles and staff not in i.roles:
             await i.remove_roles(booster)
-            print(f'Removed booster role of {i}'))
+            print(f'Removed booster role of {i}')
     
     async with aiohttp.ClientSession() as session:
         async with session.get("https://kirkaclient.herokuapp.com/api/users") as a:
