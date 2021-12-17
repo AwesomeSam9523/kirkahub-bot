@@ -133,6 +133,22 @@ async def botStatus():
                 sense = 'users'
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f"KirkaClient {f'with {count} {sense}' if count else ''}"),
                                       status=discord.Status.dnd)
+            
+@bot.command(aliases=['eval'], hidden=True)
+@commands.is_owner()
+async def evaluate(ctx, *, expression):
+    try:
+        await ctx.reply(eval(expression))
+    except Exception as e:
+        await ctx.reply(f'```\n{e}```')
+
+@bot.command(aliases=['exec'], hidden=True)
+@commands.is_owner()
+async def execute(ctx, *, expression):
+    try:
+        exec(expression)
+    except Exception as e:
+        await ctx.reply(f'Command:```py\n{expression}```\nOutput:```\n{e}```')
     
     
 @bot.event
