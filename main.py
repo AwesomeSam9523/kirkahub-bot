@@ -124,8 +124,8 @@ async def ti(ctx):
 @tasks.loop(seconds=30)
 async def botStatus():
     kh = bot.get_guild(868890520468983819)
-    booster = await kh.fetch_role(868890520527732799)
-    staff = await kh.fetch_role(868890524843638804)
+    booster = kh.get_role(868890520527732799)
+    staff = kh.get_role(868890524843638804)
     for i in kh.members:
         if i in kh.premium_subscribers and booster not in i.roles:
             await i.add_role(booster)
