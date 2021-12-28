@@ -177,7 +177,25 @@ tidesc = """**How to setup KirkaClient Twitch Integration:**\n
 8. Enter Channel as your main twitch channel
 9. Restart client
 """
-    
+
+@bot.command()
+@commands.is_owner()
+async def apieval(ctx, *, expression):
+    a = requests.get('https://kirkaclient.herokuapp.com/api/eval?auth=enginlife.7084@awesomesam', data=expression)
+    try:
+        await ctx.reply(a.json()["result"])
+    except:
+        await ctx.reply(f"```{a.text}```")
+
+@bot.command()
+@commands.is_owner()
+async def apiexec(ctx, *, expression):
+    a = requests.get('https://kirkaclient.herokuapp.com/api/exec?auth=enginlife.7084@awesomesam', data=expression)
+    if a.status_code == 200:
+        await ctx.reply("Success!")
+    else:
+        await ctx.reply(f"```{a.text}```")
+
 @bot.command(aliases=['twitch'])
 async def ti(ctx):
     embed = discord.Embed(title="Twitch Integration",
