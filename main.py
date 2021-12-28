@@ -11,7 +11,7 @@ saycmd = {}
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 bot.remove_command("help")
 
-client = MongoClient("mongodb+srv://AwesomeSam:enginlife.7084@cluster0.kthop.mongodb.net/badges?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://AwesomeSam:enginlife.7084@cluster0.kthop.mongodb.net/kirkaclient?retryWrites=true&w=majority")
 clientdb = client.kirkaclient
 db = clientdb.badges
 
