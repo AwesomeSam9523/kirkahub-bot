@@ -5,15 +5,45 @@ from discord.ext import commands, tasks
 import asyncio, aiohttp
 import requests
 from typing import Union
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from pprint import pprint
 saycmd = {}
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 bot.remove_command("help")
 
+client = MongoClient("mongodb+srv://AwesomeSam:enginlife.7084@cluster0.kthop.mongodb.net/badges?retryWrites=true&w=majority")
+clientdb = client.kirkaclient
+db = clientdb.badges
+
+def addBadge(badgetype, value):
+    id = {"name": badgetype}
+    old = db.find_one(id)["value"]
+    if value in old:
+        return {"code": 400, "msg": "Badge already exists!"}
+    db.find_one_and_update(id, {"$push": {"value": value}})
+    return {"code": 200, "msg": "Added successfully!"}
+
+def removeBadge(badgetype, value):
+    id = {"name": badgetype}
+    old = db.find_one(id)["value"]
+    if value not in old:
+        return {"code": 400, "msg": "Badge doesn't exists!"}
+    db.find_one_and_update(id, {"$pull": {"value": value}})
+    return {"code": 200, "msg": "Removed successfully!"}
+
 def onlystaff(ctx:Context):
     if ctx.author.id == 771601176155783198:
         return True
     if ctx.guild.get_role(868890524843638804) not in ctx.author.roles:
+        return False
+    return True
+
+def onlyadmin(ctx:Context):
+    if ctx.author.id == 771601176155783198:
+        return True
+    if ctx.guild.get_role(868890524755582995) not in ctx.author.roles:
         return False
     return True
 
@@ -74,6 +104,41 @@ async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
             await ctx.reply("Invalid URL")
     except Exception as e:
         await ctx.send(f"An error occured: {e}")
+
+@bot.command(usage="`!badge add/del <type> <user>`")
+@commands.check(onlyadmin)
+async def badge(ctx: Context, action: str = None, badgetype: str = None, value: str = None):
+    if not action or not badgetype or not value:
+        return await ctx.reply(ctx.command.usage)
+    
+    action, badgetype = action.lower(), badgetype.lower()
+    if action not in ["add", "del"]:
+        return await ctx.reply(ctx.command.usage)
+    
+    allowedTypes = ["patreon", "con", "dev", "nitro", "staff", "gfx", "vip", "kdev", "custom"]
+    if badgetype not in allowedTypes:
+        return await ctx.reply(f"BadgeType can only be: `{', '.join(allowedTypes)}`")
+    
+    if badgetype != "custom":
+        if action == "add":
+            res = addBadge(badgetype, value)
+        else:
+            res = removeBadge(badgetype, value)
+        
+        return await ctx.reply(f"`[{res['code']}]` {res['msg']}")
+    
+    await ctx.send("Custom badges can't be added using this command for now.")
+
+@bot.command()
+@commands.check(onlyadmin)
+async def badges(ctx: Context):
+    a = ["patreon", "con", "dev", "nitro", "staff", "gfx", "vip", "kdev"]
+    embed = discord.Embed(title="List of Badges")
+    for i in a:
+        data = db.find_one({"name": i})["value"]
+        data = "\n".join(data) if len(data) != 0 else "-"
+        embed.add_field(name=f"`{i}`", value=f"```\n{data}```", inline=False)
+    await ctx.send(embed=embed)
 
 @bot.command()
 @commands.check(onlystaff)
