@@ -6,8 +6,6 @@ import asyncio, aiohttp
 import requests
 from typing import Union
 from pymongo import MongoClient
-from bson.objectid import ObjectId
-from pprint import pprint
 saycmd = {}
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())

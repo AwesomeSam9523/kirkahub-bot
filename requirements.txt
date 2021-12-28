@@ -2,4 +2,4 @@ requests~=2.25.1
 psutil
 git+https://github.com/Rapptz/discord.py
 pymongo
-"pymongo[srv]"
+pymongo[srv]
