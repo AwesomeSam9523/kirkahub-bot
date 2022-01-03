@@ -135,7 +135,7 @@ async def badges(ctx: Context):
     for i in a:
         data = db.find_one({"name": i})["value"]
         data = "\n".join(data) if len(data) != 0 else "-"
-        embed.add_field(name=f"`{i}`", value=f"```\n{data}```", inline=False)
+        embed.add_field(name=f"`{i}`", value=f"```\n{data}```")
     await ctx.send(embed=embed)
 
 @bot.command()
