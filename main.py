@@ -6,6 +6,7 @@ import asyncio, aiohttp
 import requests
 from typing import Union
 from pymongo import MongoClient
+import json
 saycmd = {}
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
@@ -103,6 +104,13 @@ async def steal(ctx:Context, name:str, emoji:Union[discord.Emoji, str]=None):
     except Exception as e:
         await ctx.send(f"An error occured: {e}")
 
+async def getResponse(ctx):
+    def check(msg):
+        return msg.channel == ctx.channel and msg.author == ctx.author
+
+    msg = await bot.wait_for('message', check=check)
+    return msg
+
 @bot.command(usage="`!badge add/del <type> <user>`")
 @commands.check(onlyadmin)
 async def badge(ctx: Context, action: str = None, badgetype: str = None, value: str = None):
@@ -125,7 +133,40 @@ async def badge(ctx: Context, action: str = None, badgetype: str = None, value: 
         
         return await ctx.reply(f"`[{res['code']}]` {res['msg']}")
     
-    await ctx.send("Custom badges can't be added using this command for now.")
+    await ctx.send('Upload the image from your PC as an attachment. The image should be 512x512.\n'+
+                '__Note:__ It is your duty to ensure the same. Please ask the patreon to fix that if its less than desired size.')
+    while True:
+        msg: discord.Message = await getResponse(ctx)
+        if len(msg.attachments) > 0:
+            break
+    attch = msg.attachments[0].url
+    if attch[-3:].lower() not in ['png', 'jpg', 'jpeg']:
+        return await ctx.send('Image not a `PNG/JPG` file. Aborted!')
+    await ctx.send('Enter the motto. Make sure its not NSFW or inappropriate.')
+    msg = await getResponse(ctx)
+    motto = msg.content
+
+    data = {
+        'url': attch,
+        'role': motto,
+        'type': value.lower(),
+        'name': value
+    }
+    
+    id = {"name": "custom"}
+    old = db.find_one(id)["value"]
+    new = []
+
+    for badge in old:
+        if badge["name"] == value:
+            new.append(data)
+        else:
+            new.append(badge)
+    
+    db.find_one_and_update(id, {"$set": {"value": new}})
+    await ctx.send('Updated Successfully!')
+    embed = discord.Embed(description=f"Please update the badge of `{value}` at [Discord Dev Portal](<https://discord.com/developers/applications/871730144836976650/rich-presence/assets>) to the [new Image]({attch}). Add \\✔️ reaction on this message once its done!")
+    await bot.get_channel(868890525871247452).send(f'<@&868890524843638806>s', embed=embed)
 
 @bot.command()
 @commands.check(onlyadmin)
