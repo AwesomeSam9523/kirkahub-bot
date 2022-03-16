@@ -11,6 +11,7 @@ saycmd = {}
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 bot.remove_command("help")
+bot.updating, bot.notif = False, False
 
 client = MongoClient("mongodb+srv://AwesomeSam:enginlife.7084@cluster0.kthop.mongodb.net/kirkaclient?retryWrites=true&w=majority")
 clientdb = client.kirkaclient
@@ -111,8 +112,8 @@ async def getResponse(ctx):
     msg = await bot.wait_for('message', check=check)
     return msg
 
-@bot.command(usage="`!badge add/del <type> <user>`")
-@commands.check(onlyadmin)
+#@bot.command(usage="`!badge add/del <type> <user>`")
+#@commands.check(onlyadmin)
 async def badge(ctx: Context, action: str = None, badgetype: str = None, value: str = None):
     if not action or not badgetype or not value:
         return await ctx.reply(ctx.command.usage)
@@ -168,8 +169,8 @@ async def badge(ctx: Context, action: str = None, badgetype: str = None, value: 
     embed = discord.Embed(description=f"Please update the badge of `{value}` at [Discord Dev Portal](<https://discord.com/developers/applications/871730144836976650/rich-presence/assets>) to the [new Image]({attch}). Add \\✔️ reaction on this message once its done!")
     await bot.get_channel(868890525871247452).send(f'<@&868890524843638806>s', embed=embed)
 
-@bot.command()
-@commands.check(onlyadmin)
+#@bot.command()
+#@commands.check(onlyadmin)
 async def badges(ctx: Context):
     a = ["patreon", "con", "dev", "nitro", "staff", "gfx", "vip", "kdev"]
     embed = discord.Embed(title="List of Badges")
@@ -178,6 +179,18 @@ async def badges(ctx: Context):
         data = "\n".join(data) if len(data) != 0 else "-"
         embed.add_field(name=f"`{i}`", value=f"```\n{data}```")
     await ctx.send(embed=embed)
+
+@bot.command()
+@commands.is_owner()
+async def update(ctx: Context):
+    bot.updating = True
+    await ctx.send('Switched to update mode for 300 secs.')
+
+@bot.command()
+@commands.is_owner()
+async def done(ctx: Context):
+    bot.updating = False
+    await ctx.send('Switched back to prod mode.')
 
 @bot.command()
 @commands.check(onlystaff)
@@ -208,15 +221,13 @@ async def bgtos(ctx):
     await ctx.reply("Use `;bgtos` instead.")
 
 tidesc = """**How to setup KirkaClient Twitch Integration:**\n
-1. Make a new Twitch Account
-2. Name it whatever you wish (it will be bot's name)
-3. Go to https://twitchapps.com/tmi/ and authorize with new account
-4. Copy the token to clipboard
-5. Open KirkaClient
-6. Enter Username as your bot's name
-7. Enter OAuth token as token you copied
-8. Enter Channel as your main twitch channel
-9. Restart client
+1. Go to https://twitchapps.com/tmi/ and authorize with twitch account
+2. Copy the token to clipboard
+3. Open KirkaClient
+4. Enter Username as your bot's name
+5. Enter OAuth token as token you copied
+6. Enter Channel as your main twitch channel
+7. Restart client
 """
 
 @bot.command()
@@ -259,14 +270,27 @@ async def botStatus():
     
     async with aiohttp.ClientSession() as session:
         async with session.get("https://kirkaclient.herokuapp.com/api/users") as a:
+            if a.status != 200:
+                if bot.updating:
+                    return
+                
+                if not bot.notif:
+                    bot.get_channel(868890525871247452).send(
+                        f'<@&868890524843638806> Client\'s server seems to have crashed. Please restart @ <https://dashboard.heroku.com/apps/kirkaclient/> asap.'
+                    )
+                    bot.notif = True
+                return
             a = await a.json()
             count = a["count"]
             if count == 1:
                 sense = 'user'
             else:
                 sense = 'users'
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f"KirkaClient {f'with {count} {sense}' if count else ''}"),
-                                      status=discord.Status.dnd)
+            await bot.change_presence(
+                activity=discord.Activity(type=discord.ActivityType.playing,
+                name=f"KirkaClient {f'with {count} {sense}' if count else ''}"),
+                status=discord.Status.dnd
+            )
             
 @bot.command(aliases=['eval'], hidden=True)
 @commands.is_owner()
