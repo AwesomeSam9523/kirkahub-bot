@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 bot.remove_command("help")
 bot.updating, bot.notif = False, False
 
-client = MongoClient("mongodb+srv://AwesomeSam:enginlife.7084@cluster0.kthop.mongodb.net/kirkaclient?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://bot:2fvx3GuVU76z24X@cluster0.kthop.mongodb.net/kirkaclient?retryWrites=true&w=majority")
 clientdb = client.kirkaclient
 db = clientdb.badges
 
@@ -58,11 +58,13 @@ async def on_member_join(member:discord.Member):
         anno = "rd"
     else:
         anno = "th"
-    embed = discord.Embed(title="Welcome to Kirka Hub!",
-                          description=f"**You are our {count}{anno}** member!\n\n"
-                                      f"Head over to <#868890525565079595> for any basic information you may need and "
-                                      f"make sure to equip cool roles from <#868890525565079598> 😎",
-                          color=3342080)
+    embed = discord.Embed(
+        title="Welcome to Kirka Hub!",
+        description=f"**You are our {count}{anno}** member!\n\n"
+                    f"Head over to <#868890525565079595> for any basic information you may need and "
+                    f"make sure to equip cool roles from <#868890525565079598> 😎",
+        color=3342080
+    )
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_thumbnail(url=member.display_avatar.url or member.default_avatar.url)
     await bot.get_channel(868890526433280027).send(f"{member.mention}", embed=embed)
@@ -70,9 +72,11 @@ async def on_member_join(member:discord.Member):
 @bot.event
 async def on_member_remove(member:discord.Member):
     count = member.guild.member_count
-    embed = discord.Embed(title="Goodbye :(",
-                          description=f"{member.mention} just left. We now have {count} members.",
-                          color=16711680)
+    embed = discord.Embed(
+        title="Goodbye :(",
+        description=f"{member} just left. We now have {count} members.",
+        color=16711680
+    )
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_thumbnail(url=member.display_avatar.url or member.default_avatar.url)
     await bot.get_channel(868890526433280027).send(embed=embed)
@@ -220,7 +224,8 @@ async def say(ctx, *, sentence):
 async def bgtos(ctx):
     await ctx.reply("Use `;bgtos` instead.")
 
-tidesc = """**How to setup KirkaClient Twitch Integration:**\n
+tidesc = """
+**How to setup KirkaClient Twitch Integration:**\n
 1. Go to https://twitchapps.com/tmi/ and authorize with twitch account
 2. Copy the token to clipboard
 3. Open KirkaClient
@@ -230,28 +235,12 @@ tidesc = """**How to setup KirkaClient Twitch Integration:**\n
 7. Restart client
 """
 
-@bot.command()
-@commands.is_owner()
-async def apieval(ctx, *, expression):
-    a = requests.get('https://kirkaclient.herokuapp.com/api/eval?auth=enginlife.7084@awesomesam', data=expression)
-    try:
-        await ctx.reply(a.json()["result"])
-    except:
-        await ctx.reply(f"```{a.text}```")
-
-@bot.command()
-@commands.is_owner()
-async def apiexec(ctx, *, expression):
-    a = requests.get('https://kirkaclient.herokuapp.com/api/exec?auth=enginlife.7084@awesomesam', data=expression)
-    if a.status_code == 200:
-        await ctx.reply("Success!")
-    else:
-        await ctx.reply(f"```{a.text}```")
-
 @bot.command(aliases=['twitch'])
 async def ti(ctx):
-    embed = discord.Embed(title="Twitch Integration",
-                         description=tidesc)
+    embed = discord.Embed(
+        title="Twitch Integration",
+        description=tidesc
+    )
     embed.set_image(url="https://media.discordapp.net/attachments/868890525871247451/913617441106571304/unknown.png")
     await ctx.send(embed=embed)
 
@@ -269,16 +258,8 @@ async def botStatus():
             print(f'Removed booster role of {i}')
     
     async with aiohttp.ClientSession() as session:
-        async with session.get("https://kirkaclient.herokuapp.com/api/users") as a:
+        async with session.get("https://client.kirka.io/api/users") as a:
             if a.status != 200:
-                if bot.updating:
-                    return
-                
-                if not bot.notif:
-                    bot.get_channel(868890525871247452).send(
-                        f'<@&868890524843638806> Client\'s server seems to have crashed. Please restart @ <https://dashboard.heroku.com/apps/kirkaclient/> asap.'
-                    )
-                    bot.notif = True
                 return
             a = await a.json()
             count = a["count"]
@@ -289,7 +270,7 @@ async def botStatus():
             await bot.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.playing,
                 name=f"KirkaClient {f'with {count} {sense}' if count else ''}"),
-                status=discord.Status.dnd
+                status=discord.Status.idle
             )
             
 @bot.command(aliases=['eval'], hidden=True)
