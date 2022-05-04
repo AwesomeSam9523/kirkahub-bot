@@ -295,4 +295,4 @@ async def on_ready():
     print("Ready!")
     botStatus.start()
 
-bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.n_2ihr6mfQI38s_dvpww265yL80")
+bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.wsUVrFWcGyuzG0rz728U1A7NO1U")
