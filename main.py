@@ -249,11 +249,12 @@ async def botStatus():
     kh = bot.get_guild(868890520468983819)
     booster = kh.get_role(868890520527732799)
     staff = kh.get_role(868890524843638804)
+    respected = kh.get_role(868890520527732797)
     for i in kh.members:
         if i in kh.premium_subscribers and booster not in i.roles:
             await i.add_roles(booster)
             print(f'Added booster role to {i}')
-        if i not in kh.premium_subscribers and booster in i.roles and staff not in i.roles:
+        if i not in kh.premium_subscribers and booster in i.roles and (staff not in i.roles or respected not in i.roles):
             await i.remove_roles(booster)
             print(f'Removed booster role of {i}')
     
