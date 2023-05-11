@@ -7,6 +7,7 @@ import requests
 from typing import Union
 from pymongo import MongoClient
 import json
+import time
 saycmd = {}
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
@@ -295,5 +296,101 @@ async def execute(ctx, *, expression):
 async def on_ready():
     print("Ready!")
     botStatus.start()
+
+ONLINE_STATUS = "<:status_online:1106062321647878144>"
+INVISIBLE_STATUS = "<:status_invisible:1106062593409433680>"
+IDLE_STATUS = "<:status_idle:1106062645561405493>"
+DND_STATUS = "<:status_dnd:1106062696044056630>"
+
+last_seen_map = {
+    771601176155783198: 0,
+    1091619634404401223: 0
+}
+bot.last_seen_msg: discord.Message = None
+last_mobile_map = {
+    771601176155783198: False,
+    1091619634404401223: False
+}
+last_status_map = {
+    771601176155783198: discord.Status.offline,
+    1091619634404401223: discord.Status.offline
+}
+
+def get_user_status(member_id, member_status, web):
+    status_text = ""
+    last_seen = None
+    if web:
+        status_text = "🖥️ "
+    else:
+        status_text = "📱 "
+
+    if member_status == discord.Status.online:
+        status_text += ONLINE_STATUS
+    elif member_status == discord.Status.offline:
+        status_text += INVISIBLE_STATUS
+        last_seen = int(time.time())
+    elif member_status == discord.Status.idle:
+        status_text += IDLE_STATUS
+    elif member_status == discord.Status.dnd:
+        status_text += DND_STATUS
+    elif member_status == discord.Status.invisible:
+        status_text += INVISIBLE_STATUS
+        last_seen = int(time.time())
+
+    return status_text, last_seen
+
+@bot.event
+async def on_presence_update(before: discord.Member, after: discord.Member):
+    if before.guild.id != 1091742337606107138:
+        return
+    if before.id not in [771601176155783198, 1091619634404401223]:
+        return
+
+    earlier_web = not before.is_on_mobile()
+    later_web = not after.is_on_mobile()
+    if before.is_on_mobile():
+        before_status = before.mobile_status or before.status or before.web_status or before.desktop_status
+    else:
+        before_status = before.status or before.web_status or before.desktop_status
+    if after.is_on_mobile():
+        after_status = after.mobile_status or after.status or after.web_status or after.desktop_status
+    else:
+        after_status = after.status or after.web_status or after.desktop_status
+    
+    last_mobile_map[before.id] = after.is_on_mobile()
+    last_status_map[before.id] = after_status
+
+    before_text, _ = get_user_status(before.id, before_status, earlier_web)
+    after_text, last_seen = get_user_status(after.id, after_status, later_web)
+
+    if before_text != after_text:
+        await bot.get_channel(1106059865698345040).send(
+            f"{before}: {before_text} `->` {after_text}"
+    )
+        print(f"{before}: {before_text} `->` {after_text}")
+
+    if last_seen:
+        last_seen_map[before.id] = last_seen
+
+    sam_status = bot.get_guild(1091742337606107138).get_member(771601176155783198).status
+    if sam_status == discord.Status.offline:
+        sam_last_seen = last_seen_map[771601176155783198]
+        last_seen_text = f"AwesomeSam: <t:{sam_last_seen}:d> <t:{sam_last_seen}:t> (<t:{sam_last_seen}:R>)"
+    else:
+        sam_text, _ = get_user_status(771601176155783198, sam_status, False)
+        last_seen_text = f"AwesomeSam: {sam_text}"
+
+    patatar_status = bot.get_guild(1091742337606107138).get_member(1091619634404401223).status
+    if patatar_status == discord.Status.offline:
+        patatar_last_seen = last_seen_map[1091619634404401223]
+        last_seen_text += f"\nPatatar: <t:{patatar_last_seen}:d> <t:{patatar_last_seen}:t> (<t:{patatar_last_seen}:R>)"
+    else:
+        patatar_text, _ = get_user_status(1091619634404401223, patatar_status, False)
+        last_seen_text += f"\nPatatar: {patatar_text}"
+
+    if bot.last_seen_msg:
+        await bot.last_seen_msg.edit(content=last_seen_text)
+    else:
+        bot.last_seen_msg = await bot.get_channel(1106067025173942342).send(last_seen_text)
 
 bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.wsUVrFWcGyuzG0rz728U1A7NO1U")
