@@ -8,6 +8,7 @@ from typing import Union
 from pymongo import MongoClient
 import json
 import time
+import config
 saycmd = {}
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
@@ -393,4 +394,4 @@ async def on_presence_update(before: discord.Member, after: discord.Member):
     else:
         bot.last_seen_msg = await bot.get_channel(1106067025173942342).send(last_seen_text)
 
-bot.run("OTAyMjUwNjQ2NzgxMTY5Njg1.YXbsZQ.wsUVrFWcGyuzG0rz728U1A7NO1U")
+bot.run(config.BOT_TOKEN)
